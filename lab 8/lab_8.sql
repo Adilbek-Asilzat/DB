@@ -108,7 +108,7 @@ INSERT INTO customers VALUES (202, 'Anny', '2021-11-02');
 INSERT INTO customers VALUES (203, 'Rick', '2021-11-24');
 insert into customers VALUES (204, 'Alice', '2021-11-12');
 insert into customers VALUES (205, 'Den', '2021-11-30');
-update customers set name = 'MariS' where id = 204;
+update customers set name = 'Marid' where id = 204;
 select * from customers;
 select * from cus_audit;
 --2b
@@ -138,7 +138,7 @@ CREATE TABLE age (
          date_birth  timestamp,
          age interval
 );
-insert into age values('2005-08-09', null);
+insert into age values('2006-08-09', null);
 select * from age;
 --2c
 create or replace function fun_2()
@@ -170,7 +170,7 @@ CREATE TABLE products (
          name varchar UNIQUE NOT NULL,
          price double precision NOT NULL CHECK (price > 0)
 );
-INSERT INTO products (id, name, price) VALUES (1, 'PHONE', 50000);
+INSERT INTO products (id, name, price) VALUES (2, 'PHONEe', 50000);
 select * from products;
 
 --2d
@@ -204,7 +204,7 @@ INSERT INTO prod (id, name, price) VALUES (1, 'PHONE', 50000);
 select * from prod;
 delete from prod where name = 'PHONE';
 --2e
---запускает функции 1d и 1e
+
 create or replace function fun_5()
     returns trigger
     language plpgsql
@@ -295,7 +295,7 @@ create table task4(
         workexperince integer,
         discount integer
 );
-insert into task4 values (3, 'Ann', '2000-12-23', 21, 100000, 4, 0);
+insert into task4 values (6, 'Ane', '2000-12-23', 50, 100000, 30, 0);
 select * from task4;
 
 
@@ -321,14 +321,6 @@ CREATE TABLE recomenders (
          recommendedby integer,
          timestamp timestamp
 );
-
-CREATE TABLE booking (
-         facid integer PRIMARY KEY REFERENCES facilities (facid),
-         memid integer PRIMARY KEY REFERENCES members (memid),
-         starttime timestamp,
-         slots integer
-);
-
 CREATE TABLE facilities (
          facid integer PRIMARY KEY,
          name varchar(100),
@@ -337,3 +329,27 @@ CREATE TABLE facilities (
          initialoutlay numeric,
          monthlymaintenance numeric
 );
+CREATE TABLE booking (
+         facid integer REFERENCES facilities (facid),
+         memid integer REFERENCES members (memid),
+         starttime timestamp,
+         slots integer
+);
+
+
+
+with recursive recommenders(recommender, member) as (
+	select recommendedby, memid
+		from members
+	union all
+	select mems.recommendedby, recs.member
+		from recommenders recs
+		inner join members mems
+			on mems.memid = recs.recommender
+)
+select recs.member member, recs.recommender, mems.firstname, mems.surname
+	from recommenders recs
+	inner join members mems
+		on recs.recommender = mems.memid
+	where recs.member = 22 or recs.member = 12
+order by recs.member asc, recs.recommender desc
